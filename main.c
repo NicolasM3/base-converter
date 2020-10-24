@@ -30,14 +30,14 @@ numberToletter (int number)
 }
 
 int
-findComma (char number[])
+find (char number[], char charToFind)
 {
   signed int found = -1;
   for (int i = 0; i < 10; i++)
     {
       if (number[i] == '\\')
 	break;
-      if (number[i] == ',')
+      if (number[i] == charToFind)
 	{
 	  found = i;
 	  break;
@@ -56,7 +56,7 @@ main ()
   fgets (input_number, 10, stdin);
   scanf ("%d %d", &primary_base, &second_base);
 
-  printf ("%d", findComma (input_number));
+  printf ("%d", find (input_number, ','));
 
   return 0;
 }
