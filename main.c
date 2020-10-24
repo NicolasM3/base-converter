@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
 #define qtdDigits 36
@@ -11,15 +12,13 @@ char digits[qtdDigits] =
   'y', 'z'
 };
 
-void
+int
 letterToNumber (char letter)
 {
   for (int i = 0; i < qtdDigits; i++)
     {
       if (letter == digits[i])
-	{
-	  printf ("%c", digits[i]);
-	}
+	return i;
     }
 }
 
@@ -48,6 +47,40 @@ find (char number[], char charToFind)
   return found;
 }
 
+double
+ConvertToDec (char number[], int base)
+{
+  int commaIndex = find (number, ',');
+  int intPart = 0;
+  float fractionalPart = 0;
+  int mult = -1;
+  int lenNumber = strlen (number) - 1;
+
+  if (commaIndex == -1)
+    commaIndex = lenNumber ;
+  else
+    {
+      for (int i = commaIndex + 1; i < lenNumber; i++)
+	{
+	  int decNumber = letterToNumber (number[i]);
+	  fractionalPart += decNumber * pow (base, mult);
+	  mult--;
+	}
+      
+
+    }
+    mult = 0;
+
+  for (int i = commaIndex - 1; i >= 0; i--)
+    {
+      int decNumber = letterToNumber (number[i]);
+      intPart += decNumber * pow (base, mult);
+      mult++;
+    }
+
+  return intPart + fractionalPart;
+}
+
 int
 main ()
 {
@@ -56,7 +89,7 @@ main ()
   fgets (input_number, 10, stdin);
   scanf ("%d %d", &primary_base, &second_base);
 
-  printf ("%d", find (input_number, ','));
+  printf ("%lf", ConvertToDec (input_number, primary_base));
 
   return 0;
 }
