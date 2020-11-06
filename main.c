@@ -3,94 +3,163 @@
 #include <math.h>
 #include <string.h>
 
+#define maxSize 10
 #define qtdDigits 36
 
-char digits[qtdDigits] =
-  { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-  'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-  'u', 'v', 'w', 'x',
-  'y', 'z'
-};
+const char digits[qtdDigits] =
+        {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+         'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+         'u', 'v', 'w', 'x', 'y', 'z'};
 
-int
-letterToNumber (char letter)
+int letterToNumber(char letter)
 {
-  for (int i = 0; i < qtdDigits; i++)
+    for (int i = 0; i < qtdDigits; i++)
     {
-      if (letter == digits[i])
-	return i;
+        if (letter == digits[i])
+            return i;
     }
 }
 
-char
-numberToletter (int number)
+char numberToLetter(int number)
 {
-  return digits[number];
+    return digits[number];
 }
 
-int
-find (char number[], char charToFind)
+int find(char number[], char charToFind)
 {
-  signed int found = -1;
-  for (int i = 0; i < 10; i++)
+    signed int found = -1;
+    for (int i = 0; i < maxSize; i++)
     {
-      if (number[i] == '\\')
-	break;
-      if (number[i] == charToFind)
-	{
-	  found = i;
-	  break;
-	}
-
+        if (number[i] == '\\' || number[i] == '\n')
+            break;
+        if (number[i] == charToFind)
+        {
+            found = i;
+            break;
+        }
     }
 
-  return found;
+    return found;
 }
 
-double
-ConvertToDec (char number[], int base)
+char*
+ConvertToDec(char number[], int base)
 {
-  int commaIndex = find (number, ',');
-  int intPart = 0;
-  float fractionalPart = 0;
-  int mult = -1;
-  int lenNumber = strlen (number) - 1;
+    char *ret = malloc (sizeof (char) * maxSize);
 
-  if (commaIndex == -1)
-    commaIndex = lenNumber ;
-  else
+    int commaIndex = find(number, ',');
+    if (commaIndex == -1)
+        commaIndex = find(number, '.');
+    int intPart = 0;
+    float fractionalPart = 0;
+    int mult = -1;
+    int lenNumber = strlen(number) - 1;
+
+    if (commaIndex == -1)
+        commaIndex = lenNumber;
+    else
     {
-      for (int i = commaIndex + 1; i < lenNumber; i++)
-	{
-	  int decNumber = letterToNumber (number[i]);
-	  fractionalPart += decNumber * pow (base, mult);
-	  mult--;
-	}
-      
-
+        for (int i = commaIndex + 1; i < lenNumber; i++)
+        {
+            int decNumber = letterToNumber(number[i]);
+            fractionalPart += decNumber * pow(base, mult);
+            mult--;
+        }
     }
     mult = 0;
 
-  for (int i = commaIndex - 1; i >= 0; i--)
+    for (int i = commaIndex - 1; i >= 0; i--)
     {
-      int decNumber = letterToNumber (number[i]);
-      intPart += decNumber * pow (base, mult);
-      mult++;
+        int decNumber = letterToNumber(number[i]);
+        intPart += decNumber * pow(base, mult);
+        mult++;
     }
 
-  return intPart + fractionalPart;
+    double num = (double)(intPart + fractionalPart);
+
+    snprintf(ret, maxSize, "%f", num);
+
+    return ret;
 }
 
-int
-main ()
+char*
+ConvertDecToBase(char number[], int base)
 {
-  char input_number[10];
-  int primary_base, second_base;
-  fgets (input_number, 10, stdin);
-  scanf ("%d %d", &primary_base, &second_base);
+    char *ret = malloc (sizeof (char) * maxSize);
 
-  printf ("%lf", ConvertToDec (input_number, primary_base));
+    int commaIndex = find(number, ',');
+    if (commaIndex == -1)
+        commaIndex = find(number, '.');
+    int intPart = 0;
+    float fractionalPart = 0;
+    int mult = -1;
+    int lenNumber = strlen(number) - 1;
 
-  return 0;
+    if (commaIndex == -1)
+        commaIndex = lenNumber;
+    else
+    {
+        for (int i = commaIndex + 1; i < lenNumber; i++)
+        {
+            int decNumber = letterToNumber(number[i]);
+            fractionalPart += decNumber * pow(10, mult);
+            mult--;
+        }
+    }
+    mult = 0;
+
+    for (int i = commaIndex - 1; i >= 0; i--)
+    {
+        int decNumber = letterToNumber(number[i]);
+        intPart += decNumber * round(pow(10, mult));
+        mult++;
+    }
+
+    int dividend = intPart;
+    char remainder[100];
+    int i = 0;
+    while (dividend > 0) {
+        char cur = numberToLetter(dividend % base);
+        remainder[i] = cur;
+        dividend /= base;
+        i++;
+    }
+
+    int j = 0;
+    while (i > 0) {
+        i--;
+        ret[j] = remainder[i];
+        j++;
+    }
+
+    return ret;
 }
 
+int main()
+{
+    char input_number[10];
+    int primary_base, second_base;
+    printf("numero:");
+    fflush(stdout);
+    fgets (input_number, 10, stdin);
+    fflush(stdin);
+    printf("bases:");
+    fflush(stdout);
+    scanf ("%d %d", &primary_base, &second_base);
+    fflush(stdin);
+
+
+    if (primary_base == 10) {
+        char* res = ConvertDecToBase(input_number, second_base);
+        printf("resultado: %s", res);
+    } else if (second_base == 10) {
+        char* res = ConvertToDec(input_number, primary_base);
+        printf("resultado: %s", res);
+    } else {
+        char* res1 = ConvertToDec(input_number, primary_base);
+        char* res2 = ConvertDecToBase(res1, second_base);
+        printf("resultado: %s", res2);
+    }
+
+    return 0;
+}
