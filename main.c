@@ -18,6 +18,8 @@ int letterToNumber(char letter)
         if (letter == digits[i])
             return i;
     }
+    
+    return -1;
 }
 
 char numberToLetter(int number)
@@ -138,7 +140,8 @@ ConvertDecToBase(char number[], int base)
 int main()
 {
     char input_number[10];
-    int primary_base, second_base;
+    int primary_base, second_base, lenNumber;
+    
     printf("numero:");
     fflush(stdout);
     fgets (input_number, 10, stdin);
@@ -147,7 +150,22 @@ int main()
     fflush(stdout);
     scanf ("%d %d", &primary_base, &second_base);
     fflush(stdin);
-
+    
+    if(primary_base > 36 || second_base > 36)
+    {
+        printf("Base ou bases invalidas");
+        return 0;
+    }
+    
+    lenNumber = strlen(input_number) - 1;
+    for(int i = 0; i < lenNumber; i++)
+    {
+        if(letterToNumber(input_number[i]) == -1)
+        {
+            printf("Número com caracteres inválido");
+            return 0;
+        }
+    }
 
     if (primary_base == 10) {
         char* res = ConvertDecToBase(input_number, second_base);
