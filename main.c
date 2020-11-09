@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define maxSize 10
 #define qtdDigits 36
@@ -133,24 +134,42 @@ ConvertDecToBase(char number[], int base)
         ret[j] = remainder[i];
         j++;
     }
-
+    
+    if(fractionalPart != 0) {
+        float multiply = fractionalPart;
+        ret[j] = ',';
+        j++;
+        while (multiply != 0.0 && j < 20) {
+            char res = numberToLetter(floor(multiply * base));
+            ret[j] = res;
+            multiply = (multiply * base) - floor(multiply * base);
+            j++;
+        }
+    }
+    
     return ret;
 }
 
 int main()
 {
-    char input_number[10];
+    char input_number[20];
     int primary_base, second_base, lenNumber;
+    char temSinal = '+';
     
     printf("numero:");
     fflush(stdout);
-    fgets (input_number, 10, stdin);
+    fgets (input_number, 20, stdin);
     fflush(stdin);
     printf("bases:");
     fflush(stdout);
     scanf ("%d %d", &primary_base, &second_base);
     fflush(stdin);
     
+    if(find(input_number,'-') != -1){
+        temSinal = '-';
+        char* semSinal = input_number + 1;
+        memmove(input_number, semSinal, strlen(semSinal) + 1);
+    }
     if(primary_base > 36 || second_base > 36)
     {
         printf("Base ou bases invalidas");
@@ -160,7 +179,7 @@ int main()
     lenNumber = strlen(input_number) - 1;
     for(int i = 0; i < lenNumber; i++)
     {
-        if(letterToNumber(input_number[i]) == -1)
+        if(letterToNumber(input_number[i]) == -1 && input_number[i] != ',' && input_number[i] != '.' && input_number[i] != '-')
         {
             printf("Número com caracteres inválido");
             return 0;
@@ -169,14 +188,14 @@ int main()
 
     if (primary_base == 10) {
         char* res = ConvertDecToBase(input_number, second_base);
-        printf("resultado: %s", res);
+        printf("resultado: %c%s", temSinal, res);
     } else if (second_base == 10) {
         char* res = ConvertToDec(input_number, primary_base);
-        printf("resultado: %s", res);
+        printf("resultado: %c%s", temSinal, res);
     } else {
         char* res1 = ConvertToDec(input_number, primary_base);
         char* res2 = ConvertDecToBase(res1, second_base);
-        printf("resultado: %s", res2);
+        printf("resultado: %c%s", temSinal, res2);
     }
 
     return 0;
